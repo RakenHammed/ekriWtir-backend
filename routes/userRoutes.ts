@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as userController from "../controllers/userController";
+import * as authenticationServices from "../services/authenticationServices";
 
 export const userRoutes = Router();
 
@@ -17,6 +18,10 @@ userRoutes.get("/:id", userController.show);
  * POST
  */
 userRoutes.post("/", userController.create);
+/*
+ * POST
+ */
+userRoutes.post("/login", authenticationServices.login);
 
 /*
  * PUT

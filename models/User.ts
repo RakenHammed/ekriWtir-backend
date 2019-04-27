@@ -1,6 +1,17 @@
-import { AllowNull, Column, CreatedAt, DeletedAt, Is, IsLowercase, Model, Table, Unique, UpdatedAt, Default, DataType } from "sequelize-typescript";
+import { AllowNull, Column, CreatedAt, DeletedAt, Is, IsLowercase, Model, Table, Unique, UpdatedAt, Default, DataType, DefaultScope, Scopes } from "sequelize-typescript";
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const tunisianMobilePhoneRegex = /^[2459][0-9]{7}$/;
+
+@DefaultScope({
+    attributes: ["id", "email", "firstName", "lastName", "phoneNumber", "birthDate", "nationalId",
+        "accountAddress", "isSimpleUser", "isRenter", "isRentee", "isAdministrator"],
+})
+@Scopes({
+    auth: {
+        attributes: ["id", "email", "accountAddress", "accountPrivateKey", "password", "firstName", "lastName", "phoneNumber",
+            "birthDate", "nationalId", "isRenter", "isRentee", "isAdministrator"],
+    }
+})
 
 @Table
 export class User extends Model<User> {
@@ -34,7 +45,7 @@ export class User extends Model<User> {
     public phoneNumber: string;
 
     @Column
-    public birthdate: Date;
+    public birthDate: Date;
 
     @Column
     public nationalId: string;
