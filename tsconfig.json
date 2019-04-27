@@ -3,18 +3,12 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es6",
-        "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "dist",
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules/*"
-            ]
-        }
-    },
-    "include": [
-        "./bin/www.ts"
-    ]
+        "strictPropertyInitialization": false,    /* TO REMOVE AFTER UPGARDING SEQUELIZE-TYPESCRIPT - Ensure non-undefined class properties are initialized in the constructor. */
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+    }
 }
