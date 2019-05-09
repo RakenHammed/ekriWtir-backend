@@ -51,16 +51,16 @@ export class User extends Model<User> {
     public nationalId: string;
 
     @Default(true)
-    @Column
+    @Column(DataType.BOOLEAN)
     public isSimpleUser: boolean;
 
-    @Column
+    @Column(DataType.BOOLEAN)
     public isRenter: boolean;
 
-    @Column
+    @Column(DataType.BOOLEAN)
     public isRentee: boolean;
 
-    @Column
+    @Column(DataType.BOOLEAN)
     public isAdministrator: boolean;
 
     @CreatedAt

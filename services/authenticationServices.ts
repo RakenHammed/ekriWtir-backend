@@ -43,6 +43,7 @@ export function extractTokenAndVerify(authorization?: string) {
         const token = (typeof authorization === "string") ? authorization.substring(7) : "undefined";
         try {
             const decoded = jwt.verify(token, 'shhhhh')
+            return decoded;
         } catch (error) {
             throw (error);
         }
