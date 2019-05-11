@@ -57,7 +57,7 @@ export const create = async (req: Request, res: Response) => {
       carId: dbCar.id,
     });
     const dbLeasingDemand = await leasingDemand.save();
-    res.status(201).json(dbCar);
+    res.status(201).json(dbLeasingDemand);
   } catch (err) {
     res.status(500).json({
       error: err,
@@ -85,7 +85,6 @@ export const remove = async (req: Request, res: Response) => {
       });
     } else {
       await LeasingDemand.destroy({ where: { id: id } });
-      await Car.destroy({ where: { renteeId: id } });
       res.sendStatus(204);
     }
   } catch (error) {
