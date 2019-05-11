@@ -7,7 +7,7 @@ import { LeasingDemand } from "./LeasingDemand";
 
 @DefaultScope({
   attributes: ["id", "firstCirculationDate", "manufacturer", "model", "fuelType", "pricePerDay", "fromDate",
-    "toDate", "renteeId"],
+    "toDate"],
 })
 @Scopes({
   full: {
@@ -42,10 +42,7 @@ export class Car extends Model<Car> {
   @Column
   public toDate: Date;
 
-  @Column
-  public renteeId: number;
-
-  @HasOne(() => LeasingDemand,"id")
+  @HasOne(() => LeasingDemand)
   rentee: LeasingDemand;
 
 

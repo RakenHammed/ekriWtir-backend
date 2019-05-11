@@ -1,7 +1,4 @@
 import { Request, Response } from "express";
-import Web3 from 'web3';
-import { User } from "../models/User";
-import bcrypt from "bcrypt";
 import * as authenticationServices from "../services/authenticationServices";
 import { LeasingDemand } from "../models/LeasingDemand";
 import { Car } from "../models/Car";
@@ -44,11 +41,6 @@ export const show = async (req: Request, res: Response) => {
  */
 export const create = async (req: Request, res: Response) => {
   try {
-    const leasingDemand = new LeasingDemand({
-      airport: req.body.airport,
-      userId: req.body.user.id,
-    });
-    let dbLeasingDemand = await leasingDemand.save();
     const car = new Car({
       firstCirculationDate: req.body.car.firstCirculationDate,
       manufacturer: req.body.car.manufacturer,
@@ -57,11 +49,14 @@ export const create = async (req: Request, res: Response) => {
       pricePerDay: req.body.car.pricePerDay,
       fromDate: req.body.car.fromDate,
       toDate: req.body.car.toDate,
-      renteeId: dbLeasingDemand.dataValues.id,
     });
     const dbCar = await car.save();
-    dbLeasingDemand.carId = dbCar.id;
-    dbLeasingDemand = await dbLeasingDemand.save();
+    const leasingDemand = new LeasingDemand({
+      airport: req.body.airport,
+      userId: req.body.user.id,
+      carId: dbCar.id,
+    });
+    const dbLeasingDemand = await leasingDemand.save();
     res.status(201).json(dbCar);
   } catch (err) {
     res.status(500).json({
