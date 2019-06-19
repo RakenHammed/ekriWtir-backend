@@ -1,3 +1,4 @@
+import { availableCarsRoutes } from './routes/availableCarsRoutes';
 import cookieParser from "cookie-parser";
 import express, { NextFunction, Request, Response } from "express";
 import createError from "http-errors";
@@ -45,6 +46,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/users", userRoutes);
 app.use("/leasingDemands", leasingDemandsRoutes);
 app.use("/rentingDemands", rentingDemandsRoutes);
+app.use("/availableCars", availableCarsRoutes);
+
 
 
 

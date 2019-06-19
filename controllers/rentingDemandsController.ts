@@ -96,7 +96,7 @@ export const remove = async (req: Request, res: Response) => {
       });
     } else {
       const rentingDemand = await RentingDemand.scope().findOne({ where: { id } });
-      const car = rentingDemand.car;
+      const car = await Car.scope().findOne({ where: { id: rentingDemand.id } });
       const numberOfDays: number = numberOfDaysRented(car.fromDate, car.toDate);
       const totalAmount = numberOfDays * car.pricePerDay;
       const web3 = web3Provider.web3;
