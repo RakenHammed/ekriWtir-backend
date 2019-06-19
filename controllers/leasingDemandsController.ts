@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
-import * as authenticationServices from "../services/authenticationServices";
-import { LeasingDemand } from "../models/LeasingDemand";
+import * as fs from "fs";
 import { Car } from "../models/Car";
+import { LeasingDemand } from "../models/LeasingDemand";
+import * as authenticationServices from "../services/authenticationServices";
+import * as web3Provider from "../services/blockChainConnection";
 
 /**
  * userController.list()
@@ -26,7 +28,7 @@ export const show = async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
     authenticationServices.extractTokenAndVerify(req.headers.authorization);
-    const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id: id } });
+    const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id } });
     res.status(201).json(leasingDemand);
   } catch (err) {
     res.status(500).json({
@@ -84,7 +86,7 @@ export const remove = async (req: Request, res: Response) => {
         message: "Access forbidden.",
       });
     } else {
-      await LeasingDemand.destroy({ where: { id: id } });
+      await LeasingDemand.destroy({ where: { id } });
       res.sendStatus(204);
     }
   } catch (error) {
@@ -95,3 +97,37 @@ export const remove = async (req: Request, res: Response) => {
   }
 };
 
+export const accept = async (req: Request, res: Response) => {
+  const leasingDemandId = req.params.id;
+  try {
+    const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id: leasingDemandId } });
+    const web3 = web3Provider.web3;
+    const carId: number = leasingDemand.carId;
+    const car: Car = leasingDemand.car;
+    fs.readFile("./build/contracts/CarToken.json", "utf8", async (error, data) => {
+      const carToken = JSON.parse(data);
+      try {
+        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x9ad3dF2B2f535a8b94175d3Cc844a6A520Ae8B62");
+        await carTokenContract.methods.createCar(carId, "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203", car.pricePerDay).send({
+          from: "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203",
+          gas: 2000000,
+        });
+        await LeasingDemand.destroy({ where: { leasingDemandId } });
+        res.status(204).json();
+      } catch (error) {
+        throw error;
+      }
+      //   try {
+      //     const cars = await carTokenContract.methods.getAllCars().call();
+      //     console.log(cars);
+      //   } catch (error) {
+      //     throw new Error(error);
+      //   }
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+      message: "Error when getting the leasing demand.",
+    });
+  }
+};

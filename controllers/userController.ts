@@ -97,12 +97,9 @@ export const show = async (req: Request, res: Response) => {
  * userController.create()
  */
 export const create = async (req: Request, res: Response) => {
-  const web3 = new Web3(Web3.givenProvider || 'ws://localhost:7545', null, {});
-  const account = web3.eth.accounts.create();
   try {
     const user = new User({
-      accountPrivateKey: account.privateKey,
-      accountAddress: account.address,
+      accountAddress: req.body.accountAddress,
       email: req.body.email,
       password: hashPassword(req.body.password),
       firstName: req.body.firstName,

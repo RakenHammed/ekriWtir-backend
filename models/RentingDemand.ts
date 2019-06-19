@@ -15,9 +15,14 @@ import { User } from "./User";
 })
 
 @Table
-export class LeasingDemand extends Model<LeasingDemand> {
+export class RentingDemand extends Model<RentingDemand> {
 
-  @AllowNull(false)
+  @Column
+  public driverLicenseId: string;
+
+  @Column
+  public driverLicenseDateOfIssue: string;
+
   @Column
   public airport: string;
 

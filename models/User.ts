@@ -8,7 +8,7 @@ const tunisianMobilePhoneRegex = /^[2459][0-9]{7}$/;
 })
 @Scopes({
     auth: {
-        attributes: ["id", "email", "accountAddress", "accountPrivateKey", "password", "firstName", "lastName", "phoneNumber",
+        attributes: ["id", "email", "accountAddress", "password", "firstName", "lastName", "phoneNumber",
             "birthDate", "nationalId", "isRenter", "isRentee", "isAdministrator"],
     }
 })
@@ -29,10 +29,6 @@ export class User extends Model<User> {
     @AllowNull(false)
     @Column
     public accountAddress: string;
-
-    @AllowNull(false)
-    @Column
-    public accountPrivateKey: string;
 
     @Column
     public firstName: string;

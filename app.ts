@@ -6,7 +6,9 @@ import path from "path";
 // import { indexRouter } from "./routes/index";
 import { userRoutes } from "./routes/userRoutes";
 import { leasingDemandsRoutes } from "./routes/leasingDemandsRoutes";
+import { rentingDemandsRoutes } from "./routes/rentingDemandsRoutes";
 import { sequelize } from "./sequelize";
+
 sequelize.sync({ force: false }).then();
 
 export const app: express.Application = express();
@@ -42,6 +44,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // app.use("/", indexRouter);
 app.use("/users", userRoutes);
 app.use("/leasingDemands", leasingDemandsRoutes);
+app.use("/rentingDemands", rentingDemandsRoutes);
+
 
 
 // catch 404 and forward to error handler

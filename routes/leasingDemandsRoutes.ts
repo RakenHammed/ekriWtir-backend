@@ -19,6 +19,11 @@ leasingDemandsRoutes.get("/:id", leasingDemandsController.show);
 leasingDemandsRoutes.post("/", leasingDemandsController.create);
 
 /*
+ * POST
+ */
+leasingDemandsRoutes.post("/accept", leasingDemandsController.accept);
+
+/*
  * PUT
  */
 leasingDemandsRoutes.put("/:id", leasingDemandsController.update);

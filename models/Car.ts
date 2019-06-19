@@ -1,9 +1,9 @@
 import {
-  AllowNull, Column, CreatedAt,
-  DeletedAt, Model, Table, UpdatedAt, DefaultScope, Scopes, BelongsTo, ForeignKey, HasOne
+  AllowNull, BelongsTo, Column,
+  CreatedAt, DefaultScope, DeletedAt, ForeignKey, HasOne, Model, Scopes, Table, UpdatedAt, HasMany
 } from "sequelize-typescript";
-import { RentingDemand } from "./RentingDemand";
 import { LeasingDemand } from "./LeasingDemand";
+import { RentingDemand } from "./RentingDemand";
 
 @DefaultScope({
   attributes: ["id", "firstCirculationDate", "manufacturer", "model", "fuelType", "pricePerDay", "fromDate",
@@ -42,9 +42,14 @@ export class Car extends Model<Car> {
   @Column
   public toDate: Date;
 
-  @HasOne(() => LeasingDemand)
-  rentee: LeasingDemand;
+  @Column
+  public isRented: boolean;
 
+  @HasOne(() => LeasingDemand)
+  public rentee: LeasingDemand;
+
+  @HasMany(() => RentingDemand)
+  public renter: RentingDemand;
 
   @CreatedAt
   @Column
