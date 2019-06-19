@@ -19,6 +19,11 @@ rentingDemandsRoutes.get("/:id", rentingDemandsController.show);
 rentingDemandsRoutes.post("/", rentingDemandsController.create);
 
 /*
+ * POST
+ */
+rentingDemandsRoutes.post("/accept", rentingDemandsController.accept);
+
+/*
  * PUT
  */
 rentingDemandsRoutes.put("/:id", rentingDemandsController.update);

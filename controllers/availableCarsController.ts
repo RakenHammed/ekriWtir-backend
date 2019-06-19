@@ -15,7 +15,7 @@ export const list = async (req: Request, res: Response) => {
     fs.readFile("./build/contracts/CarToken.json", "utf8", async (error, data) => {
       const carToken = JSON.parse(data);
       try {
-        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x721084fDDE8E8871416FbFBFbe69b053e848179d");
+        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x9ad3dF2B2f535a8b94175d3Cc844a6A520Ae8B62");
         const cars = await carTokenContract.methods.getAllAvailableCars().call();
         const carsIds: number[] = [];
         for (const car of cars) {

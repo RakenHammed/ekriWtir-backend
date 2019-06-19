@@ -12,23 +12,8 @@ import * as web3Provider from "../services/blockChainConnection";
  */
 export const list = async (req: Request, res: Response) => {
   try {
-    // const transaction = await newFunction(req);
-    const web3 = web3Provider.web3;
-    fs.readFile("./build/contracts/CarToken.json", "utf8", async (error, data) => {
-      const carToken = JSON.parse(data);
-      try {
-        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x721084fDDE8E8871416FbFBFbe69b053e848179d");
-        const cars = await carTokenContract.methods.getAllAvailableCars().call();
-        const carsIds: number[] = [];
-        for (const car of cars) {
-          carsIds.push(car.id);
-        }
-        const dbCars = await Car.scope().findAll({ where: { id: carsIds } });
-        res.status(201).json(dbCars);
-      } catch (error) {
-        throw new Error(error);
-      }
-    });
+    const rentingDemands = await RentingDemand.scope().findAll();
+    res.status(201).json(rentingDemands);
   } catch (err) {
     res.status(500).json({
       error: err,
@@ -80,7 +65,7 @@ export const create = async (req: Request, res: Response) => {
       value: dinarToWei(totalAmount),
       gas: 2000000,
       gasPrice: "20000000000",
-      nonce: nonce,
+      nonce,
       chainId: 5777
     }, privateKey);
     await web3.eth.sendSignedTransaction(signedTransactionData.rawTransaction).then(() => res.status(204).json());
@@ -110,7 +95,24 @@ export const remove = async (req: Request, res: Response) => {
         message: "Access forbidden.",
       });
     } else {
-      await LeasingDemand.destroy({ where: { id } });
+      const rentingDemand = await RentingDemand.scope().findOne({ where: { id } });
+      const car = rentingDemand.car;
+      const numberOfDays: number = numberOfDaysRented(car.fromDate, car.toDate);
+      const totalAmount = numberOfDays * car.pricePerDay;
+      const web3 = web3Provider.web3;
+      const user = await User.scope().findOne({ where: { id: rentingDemand.userId } });
+      const privateKey = "8e125bb2d0f3758e2a5dd4474d9d3d246a6f59d4d435b19b744641f692066937";
+      const nonce: number = await web3.eth.getTransactionCount("0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203");
+      const signedTransactionData = await web3.eth.accounts.signTransaction({
+        to: user.accountAddress,
+        value: dinarToWei(totalAmount),
+        gas: 2000000,
+        gasPrice: "20000000000",
+        nonce,
+        chainId: 5777
+      }, privateKey);
+      await web3.eth.sendSignedTransaction(signedTransactionData.rawTransaction);
+      await RentingDemand.destroy({ where: { id } });
       res.sendStatus(204);
     }
   } catch (error) {
@@ -121,6 +123,41 @@ export const remove = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * userController.remove()
+ */
+export const accept = async (req: Request, res: Response) => {
+  const id = req.body.id;
+  try {
+    const web3 = web3Provider.web3;
+    const rentingDemand = await RentingDemand.scope().findOne({ where: { id } });
+    const car = await Car.scope().findOne({ where: { id: rentingDemand.carId } });
+    const user = await User.scope().findOne({ where: { id: rentingDemand.userId } });
+    const carId = car.id;
+    const numberOfDays: number = numberOfDaysRented(car.fromDate, car.toDate);
+    fs.readFile("./build/contracts/CarToken.json", "utf8", async (error, data) => {
+      const carToken = JSON.parse(data);
+      try {
+        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x9ad3dF2B2f535a8b94175d3Cc844a6A520Ae8B62");
+        await carTokenContract.methods.transferCarToTheRenterAndSetTotalAmount(user.accountAddress, carId, numberOfDays).send({
+          from: "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203",
+          gas: 2000000,
+        });
+        await RentingDemand.destroy({ where: { id: rentingDemand.id } });
+        res.status(204).json();
+      } catch (error) {
+        throw error;
+      }
+    });
+    await RentingDemand.destroy({ where: { id } });
+    res.sendStatus(204);
+  } catch (error) {
+    res.status(500).json({
+      error,
+      message: "Error when deleting the leasing demand.",
+    });
+  }
+};
 // async function newFunction(req: Request) {
 //   const privateKey = JSON.parse(req.query.account).privateKey;
 //   const web3 = web3Provider.web3;

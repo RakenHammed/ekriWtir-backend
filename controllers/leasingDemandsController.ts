@@ -112,7 +112,7 @@ export const accept = async (req: Request, res: Response) => {
           from: "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203",
           gas: 2000000,
         });
-        await LeasingDemand.destroy({ where: { leasingDemandId } });
+        await LeasingDemand.destroy({ where: { id: leasingDemandId } });
         res.status(204).json();
       } catch (error) {
         throw error;
