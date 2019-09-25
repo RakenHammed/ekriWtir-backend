@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import * as fs from "fs";
 import { Car } from "../models/Car";
 import { LeasingDemand } from "../models/LeasingDemand";
-import * as authenticationServices from "../services/authenticationServices";
 import * as web3Provider from "../services/blockChainConnection";
 
 /**
@@ -41,7 +40,6 @@ export const list = async (req: Request, res: Response) => {
 export const show = async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    authenticationServices.extractTokenAndVerify(req.headers.authorization);
     const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id } });
     res.status(201).json(leasingDemand);
   } catch (err) {
@@ -81,7 +79,7 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const user: any = authenticationServices.extractTokenAndVerify(req.headers.authorization);
+    const user: any = req.user;
     if (!user.isAdministrator) {
       return res.status(403).json({
         message: "Access forbidden.",

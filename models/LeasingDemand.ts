@@ -5,14 +5,14 @@ import {
 import { Car } from "./Car";
 import { User } from "./User";
 
-@DefaultScope({
+@DefaultScope(() => ({
   attributes: ["id", "airport"]
-})
-@Scopes({
+}))
+@Scopes(() => ({
   full: {
-    include: [() => Car, () => User]
+    include: [{ all: true }],
   },
-})
+}))
 
 @Table
 export class LeasingDemand extends Model<LeasingDemand> {
@@ -25,14 +25,14 @@ export class LeasingDemand extends Model<LeasingDemand> {
   @Column
   public userId: number;
 
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, "userId")
   public user: User;
 
   @ForeignKey(() => Car)
   @Column
   public carId: number;
 
-  @BelongsTo(() => Car)
+  @BelongsTo(() => Car, "carId")
   public car: Car;
 
   @CreatedAt

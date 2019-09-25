@@ -1,18 +1,19 @@
 import {
-  AllowNull, BelongsTo, Column,
+  BelongsTo, Column,
   CreatedAt, DefaultScope, DeletedAt, ForeignKey, Model, Scopes, Table, UpdatedAt
 } from "sequelize-typescript";
 import { Car } from "./Car";
 import { User } from "./User";
 
-@DefaultScope({
-  attributes: ["id", "airport"]
-})
-@Scopes({
+@DefaultScope(() => ({
+  attributes: ["id", "carId", "userId", "airport"],
+  include: [Car],
+}))
+@Scopes(() => ({
   full: {
-    include: [() => Car, () => User]
-  },
-})
+    include: [{ all: true }],
+  }
+}))
 
 @Table
 export class RentingDemand extends Model<RentingDemand> {
@@ -30,14 +31,14 @@ export class RentingDemand extends Model<RentingDemand> {
   @Column
   public userId: number;
 
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, "userId")
   public user: User;
 
   @ForeignKey(() => Car)
   @Column
   public carId: number;
 
-  @BelongsTo(() => Car)
+  @BelongsTo(() => Car, "carId")
   public car: Car;
 
   @CreatedAt

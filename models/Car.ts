@@ -4,16 +4,17 @@ import {
 } from "sequelize-typescript";
 import { LeasingDemand } from "./LeasingDemand";
 import { RentingDemand } from "./RentingDemand";
+import { User } from "./User";
 
-@DefaultScope({
+@DefaultScope(() => ({
   attributes: ["id", "firstCirculationDate", "manufacturer", "model", "fuelType", "pricePerDay", "fromDate",
     "toDate"],
-})
-@Scopes({
+}))
+@Scopes(() => ({
   full: {
-    include: [() => LeasingDemand, () => RentingDemand]
+    include: [{ all: true }],
   },
-})
+}))
 
 @Table
 export class Car extends Model<Car> {
@@ -42,14 +43,18 @@ export class Car extends Model<Car> {
   @Column
   public toDate: Date;
 
+  @ForeignKey(() => User)
   @Column
-  public isRented: boolean;
+  public userId: number;
 
-  @HasOne(() => LeasingDemand)
+  @BelongsTo(() => User, "userId")
+  public user: User;
+
+  @HasOne(() => LeasingDemand, "carId")
   public rentee: LeasingDemand;
 
-  @HasMany(() => RentingDemand)
-  public renter: RentingDemand;
+  @HasMany(() => RentingDemand, "carId")
+  public renters: RentingDemand[];
 
   @CreatedAt
   @Column

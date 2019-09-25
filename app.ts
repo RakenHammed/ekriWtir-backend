@@ -1,16 +1,17 @@
-import { availableCarsRoutes } from './routes/availableCarsRoutes';
 import cookieParser from "cookie-parser";
 import express, { NextFunction, Request, Response } from "express";
 import createError from "http-errors";
 import logger from "morgan";
 import path from "path";
-// import { indexRouter } from "./routes/index";
-import { userRoutes } from "./routes/userRoutes";
+import { availableCarsRoutes } from "./routes/availableCarsRoutes";
+import { indexRouter } from "./routes/index";
 import { leasingDemandsRoutes } from "./routes/leasingDemandsRoutes";
 import { rentingDemandsRoutes } from "./routes/rentingDemandsRoutes";
+import { userRoutes } from "./routes/userRoutes";
 import { sequelize } from "./sequelize";
 
 sequelize.sync({ force: false }).then();
+// sequelize.sync({ force: true }).then();
 
 export const app: express.Application = express();
 
@@ -34,7 +35,7 @@ app.use((req, res, next) => {
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
+// app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -42,14 +43,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use("/", indexRouter);
+app.use("/", indexRouter);
 app.use("/users", userRoutes);
 app.use("/leasingDemands", leasingDemandsRoutes);
 app.use("/rentingDemands", rentingDemandsRoutes);
 app.use("/availableCars", availableCarsRoutes);
-
-
-
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

@@ -1,16 +1,15 @@
 import { Request, Response } from "express";
-import * as fs from "fs";
+import * as carToken from "../build/contracts/CarToken.json";
 import { Car } from "../models/Car";
 import { LeasingDemand } from "../models/LeasingDemand";
-import * as authenticationServices from "../services/authenticationServices";
 import * as web3Provider from "../services/blockChainConnection";
+import { adminPublicKey, carTokenContractAddress } from "../adminAndContractAddress.js";
 
 /**
  * userController.list()
  */
 export const list = async (req: Request, res: Response) => {
   try {
-    authenticationServices.extractTokenAndVerify(req.headers.authorization);
     const leasingDemands = await LeasingDemand.scope("full").findAll();
     res.status(201).json(leasingDemands);
   } catch (err) {
@@ -27,7 +26,6 @@ export const list = async (req: Request, res: Response) => {
 export const show = async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    authenticationServices.extractTokenAndVerify(req.headers.authorization);
     const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id } });
     res.status(201).json(leasingDemand);
   } catch (err) {
@@ -51,6 +49,7 @@ export const create = async (req: Request, res: Response) => {
       pricePerDay: req.body.car.pricePerDay,
       fromDate: req.body.car.fromDate,
       toDate: req.body.car.toDate,
+      userId: req.body.user.id,
     });
     const dbCar = await car.save();
     const leasingDemand = new LeasingDemand({
@@ -80,7 +79,7 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
-    const user: any = authenticationServices.extractTokenAndVerify(req.headers.authorization);
+    const user: any = req.user;
     if (!user.isAdministrator) {
       return res.status(403).json({
         message: "Access forbidden.",
@@ -98,32 +97,23 @@ export const remove = async (req: Request, res: Response) => {
 };
 
 export const accept = async (req: Request, res: Response) => {
-  const leasingDemandId = req.params.id;
+  const leasingDemandId = req.body.id;
   try {
     const leasingDemand = await LeasingDemand.scope("full").findOne({ where: { id: leasingDemandId } });
     const web3 = web3Provider.web3;
     const carId: number = leasingDemand.carId;
     const car: Car = leasingDemand.car;
-    fs.readFile("./build/contracts/CarToken.json", "utf8", async (error, data) => {
-      const carToken = JSON.parse(data);
-      try {
-        const carTokenContract = await new web3.eth.Contract(carToken.abi, "0x9ad3dF2B2f535a8b94175d3Cc844a6A520Ae8B62");
-        await carTokenContract.methods.createCar(carId, "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203", car.pricePerDay).send({
-          from: "0x622BDb2A8Fe6B716b0adCc74E11cc168f456f203",
-          gas: 2000000,
-        });
-        await LeasingDemand.destroy({ where: { id: leasingDemandId } });
-        res.status(204).json();
-      } catch (error) {
-        throw error;
-      }
-      //   try {
-      //     const cars = await carTokenContract.methods.getAllCars().call();
-      //     console.log(cars);
-      //   } catch (error) {
-      //     throw new Error(error);
-      //   }
+    const carTokenContract = await new web3.eth.Contract(carToken.abi, carTokenContractAddress);
+    await carTokenContract.methods.createCar(
+      carId,
+      adminPublicKey,
+      car.pricePerDay,
+    ).send({
+      from: adminPublicKey,
+      gas: 2000000,
     });
+    await LeasingDemand.destroy({ where: { id: leasingDemandId } });
+    res.status(204).json();
   } catch (err) {
     res.status(500).json({
       error: err,

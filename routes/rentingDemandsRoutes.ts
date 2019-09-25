@@ -11,6 +11,11 @@ rentingDemandsRoutes.get("/", rentingDemandsController.list);
 /*
  * GET
  */
+rentingDemandsRoutes.get("/availableCars/", rentingDemandsController.availableCars);
+
+/*
+ * GET
+ */
 rentingDemandsRoutes.get("/:id", rentingDemandsController.show);
 
 /*

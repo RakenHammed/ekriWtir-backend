@@ -1,17 +1,24 @@
-import { AllowNull, Column, CreatedAt, DeletedAt, Is, IsLowercase, Model, Table, Unique, UpdatedAt, Default, DataType, DefaultScope, Scopes } from "sequelize-typescript";
+import {
+    AllowNull, Column, CreatedAt, DataType, Default,
+    DefaultScope, DeletedAt, Is, IsLowercase, Model, Scopes,
+    Table, Unique, UpdatedAt, HasMany, HasOne
+} from "sequelize-typescript";
+import { RentingDemand } from "./RentingDemand";
+import { Car } from "./Car";
+import { LeasingDemand } from "./LeasingDemand";
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const tunisianMobilePhoneRegex = /^[2459][0-9]{7}$/;
 
-@DefaultScope({
+@DefaultScope(() => ({
     attributes: ["id", "email", "firstName", "lastName", "phoneNumber", "birthDate", "nationalId",
         "accountAddress", "isSimpleUser", "isRenter", "isRentee", "isAdministrator"],
-})
-@Scopes({
+}))
+@Scopes(() => ({
     auth: {
         attributes: ["id", "email", "accountAddress", "password", "firstName", "lastName", "phoneNumber",
             "birthDate", "nationalId", "isRenter", "isRentee", "isAdministrator"],
     }
-})
+}))
 
 @Table
 export class User extends Model<User> {
@@ -45,6 +52,15 @@ export class User extends Model<User> {
 
     @Column
     public nationalId: string;
+
+    @HasMany(() => RentingDemand, "userId")
+    public renters: RentingDemand[];
+
+    @HasOne(() => LeasingDemand, "userId")
+    public rentee: LeasingDemand;
+
+    @HasMany(() => Car, "userId")
+    public cars: Car[];
 
     @Default(true)
     @Column(DataType.BOOLEAN)
